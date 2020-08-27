@@ -27,9 +27,9 @@
     NSDictionary *dic = classInfo.classDic;
     [dic enumerateKeysAndObjectsUsingBlock:^(id key, NSObject *obj, BOOL *stop) {
         if ([[NSUserDefaults standardUserDefaults] boolForKey:@"isSwift"]) {
-            [resultStr appendFormat:@"\n%@\n",[self formatSwiftWithKey:key value:obj classInfo:classInfo]];
+            [resultStr appendFormat:@"%@\n",[self formatSwiftWithKey:key value:obj classInfo:classInfo]];
         }else{
-            [resultStr appendFormat:@"\n%@\n",[self formatObjcWithKey:key value:obj classInfo:classInfo]];
+            [resultStr appendFormat:@"%@\n",[self formatObjcWithKey:key value:obj classInfo:classInfo]];
         }
     }];
     return resultStr;
@@ -45,12 +45,12 @@
  *  @return
  */
 + (NSString *)formatObjcWithKey:(NSString *)key value:(NSObject *)value classInfo:(ESClassInfo *)classInfo{
-    NSString *qualifierStr = @"copy";
+    NSString *qualifierStr = @"strong";
     NSString *typeStr = @"NSString";
     //判断大小写
-    if ([ESUppercaseKeyWords containsObject:key] && [ESJsonFormatSetting defaultSetting].uppercaseKeyWordForId) {
-        key = [key uppercaseString];
-    }
+//    if ([ESUppercaseKeyWords containsObject:key] && [ESJsonFormatSetting defaultSetting].uppercaseKeyWordForId) {
+//        key = [key uppercaseString];
+//    }
     if ([value isKindOfClass:[NSString class]]) {
         return [NSString stringWithFormat:@"@property (nonatomic, %@) %@ *%@;",qualifierStr,typeStr,key];
     }else if([value isKindOfClass:[@(YES) class]]){
@@ -58,6 +58,10 @@
         qualifierStr = @"assign";
         typeStr = @"BOOL";
         return [NSString stringWithFormat:@"@property (nonatomic, %@) %@ %@;",qualifierStr,typeStr,key];
+    }else if([[key uppercaseString] containsString:@"ID"]){
+        qualifierStr = @"strong";
+        typeStr = @"NSString *";
+        return [NSString stringWithFormat:@"@property (nonatomic, %@) %@%@;",qualifierStr,typeStr,key];
     }else if([value isKindOfClass:[NSNumber class]]){
         qualifierStr = @"assign";
         NSString *valueStr = [NSString stringWithFormat:@"%@",value];
